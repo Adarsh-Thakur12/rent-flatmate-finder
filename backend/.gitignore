@@ -17,3 +17,7 @@ logs/
 # Build files
 dist/
 build/
+
+node_modules/
+.env
+.env.*
