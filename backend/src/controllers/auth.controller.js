@@ -1,0 +1,18 @@
+import { register } from "../services/auth.service.js";
+
+export const registerUser = async (req, res) => {
+    try {
+
+        const result = await register(req.body);
+
+        return res.status(result.statusCode).json(result);
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+};
