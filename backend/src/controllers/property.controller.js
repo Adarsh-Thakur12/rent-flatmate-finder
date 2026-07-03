@@ -5,6 +5,7 @@ import {
     getMyPropertiesService,
     updatePropertyService,
     deletePropertyService,
+    markPropertyFilledService,
 } from "../services/property.service.js";
 
 // ======================
@@ -57,6 +58,42 @@ export const getAllProperties = async (req, res) => {
         });
 
     }
+};
+
+// ===============================
+// Mark Property as Filled
+// ===============================
+export const markPropertyFilled = async (
+    req,
+    res
+) => {
+
+    try {
+
+        const result =
+            await markPropertyFilledService(
+                req.params.id,
+                req.user.id
+            );
+
+        return res
+            .status(result.statusCode)
+            .json(result);
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+
+            success: false,
+
+            message: "Internal Server Error",
+
+        });
+
+    }
+
 };
 
 // ======================

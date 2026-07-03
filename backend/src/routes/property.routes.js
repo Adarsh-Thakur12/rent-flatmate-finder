@@ -9,6 +9,7 @@ import {
     updateProperty,
     deleteProperty,
     uploadPropertyImage,
+    markPropertyFilled,
 } from "../controllers/property.controller.js";
 
 import { verifyToken } from "../middleware/auth.middleware.js";
@@ -55,7 +56,11 @@ router.get(
     "/:id",
     getPropertyById,
 );
-
+router.patch(
+    "/:id/fill",
+    verifyToken,
+    markPropertyFilled
+);
 router.delete(
     "/:id",
     verifyToken,

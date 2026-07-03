@@ -7,6 +7,9 @@ import favoriteRoutes from "./routes/favorite.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
 import tenantProfileRoutes from "./routes/tenantProfile.routes.js";
 import compatibilityRoutes from "./routes/compatibility.routes.js";
+import recommendationRoutes from "./routes/recommendation.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
+import chatRoutes from "./routes/chat.routes.js";
 
 const app = express();
 
@@ -20,6 +23,11 @@ app.use(express.json());
 app.use(express.urlencoded({
     extended: true,
 }));
+app.use("/api/chat", chatRoutes);
+app.use(
+    "/api/recommendation",
+    recommendationRoutes
+);
 
 // ======================
 // Health Check
@@ -73,13 +81,17 @@ app.use(
     compatibilityRoutes
 );
 
+app.use(
+    "/api/dashboard",
+    dashboardRoutes
+);
 // ======================
 // 404 Handler
 // ======================
 app.use((req, res) => {
-
+    
     return res.status(404).json({
-
+        
         success: false,
 
         message: "Route not found",

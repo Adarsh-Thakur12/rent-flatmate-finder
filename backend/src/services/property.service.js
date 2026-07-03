@@ -59,7 +59,9 @@ export const getAllPropertiesService = async (query) => {
             sort = "-createdAt",
         } = query;
 
-        const filter = {};
+        const filter = {
+    isFilled: false,
+};
 
         if (city)
             filter.city = city;
@@ -236,6 +238,66 @@ export const updatePropertyService = async (
 
     } catch (error) {
         throw error;
+    }
+
+};
+// ===============================
+// Mark Property as Filled
+// ===============================
+export const markPropertyFilledService = async (
+    propertyId,
+    ownerId
+) => {
+
+    try {
+
+        const property = await Property.findById(propertyId);
+
+        if (!property) {
+
+            return {
+                success: false,
+                statusCode: 404,
+                message: "Property not found",
+            };
+
+        }
+
+        if (property.owner.toString() !== ownerId) {
+
+            return {
+                success: false,
+                statusCode: 403,
+                message: "You are not authorized to update this property",
+            };
+
+        }
+
+        if (property.isFilled) {
+
+            return {
+                success: false,
+                statusCode: 400,
+                message: "Property is already marked as filled",
+            };
+
+        }
+
+        property.isFilled = true;
+
+        await property.save();
+
+        return {
+            success: true,
+            statusCode: 200,
+            message: "Property marked as filled successfully",
+            property,
+        };
+
+    } catch (error) {
+
+        throw error;
+
     }
 
 };

@@ -1,6 +1,12 @@
 import Booking from "../models/Booking.js";
 import Property from "../models/Property.js";
+import User from "../models/user.js";
+import Compatibility from "../models/Compatibility.js";
+import { sendMail } from "../utils/sendMail.js";
 
+// ======================
+// Create Booking
+// ======================
 // ======================
 // Create Booking
 // ======================
@@ -55,11 +61,72 @@ export const createBookingService = async (
             };
         }
 
+        // Create Booking
         const booking = await Booking.create({
             property: propertyId,
             tenant: tenantId,
             owner: property.owner,
         });
+
+        // =====================================
+        // Notify Owner if Compatibility >= 80
+        // =====================================
+        try {
+
+            const compatibility = await Compatibility.findOne({
+                tenant: tenantId,
+                property: propertyId,
+            });
+
+            const threshold = Number(
+                process.env.HIGH_COMPATIBILITY_SCORE || 80
+            );
+
+            if (
+                compatibility &&
+                compatibility.score >= threshold
+            ) {
+
+                const owner = await User.findById(property.owner);
+                const tenant = await User.findById(tenantId);
+
+                await sendMail(
+
+                    owner.email,
+
+                    "High Compatibility Tenant Interested",
+
+                    `
+                    <h2>Hello ${owner.name},</h2>
+
+                    <p>
+                        A tenant with a compatibility score of
+                        <strong>${compatibility.score}</strong>
+                        has shown interest in your property.
+                    </p>
+
+                    <p>
+                        <strong>Tenant Name:</strong>
+                        ${tenant.name}
+                    </p>
+
+                    <p>
+                        Please login and review the booking request.
+                    </p>
+                    `
+
+                );
+
+            }
+
+        } catch (mailError) {
+
+            console.log(
+                "Owner Email Error:",
+                mailError.message
+            );
+
+        }
 
         return {
             success: true,
@@ -69,8 +136,11 @@ export const createBookingService = async (
         };
 
     } catch (error) {
+
         throw error;
+
     }
+
 };
 
 // ======================
@@ -141,6 +211,9 @@ export const getPropertyBookingsService = async (ownerId) => {
 // ======================
 // Accept Booking
 // ======================
+// ======================
+// Accept Booking
+// ======================
 export const acceptBookingService = async (
     bookingId,
     ownerId,
@@ -148,8 +221,8 @@ export const acceptBookingService = async (
 ) => {
 
     try {
-       
 
+        // Only owner can accept
         if (role !== "owner") {
             return {
                 success: false,
@@ -158,11 +231,8 @@ export const acceptBookingService = async (
             };
         }
 
+        // Find booking
         const booking = await Booking.findById(bookingId);
-
-        console.log("Booking Owner:", booking.owner.toString());
-        console.log("Logged in Owner:", ownerId);
-        console.log("Role:", role);
 
         if (!booking) {
             return {
@@ -172,6 +242,7 @@ export const acceptBookingService = async (
             };
         }
 
+        // Verify owner
         if (booking.owner.toString() !== ownerId) {
             return {
                 success: false,
@@ -180,6 +251,7 @@ export const acceptBookingService = async (
             };
         }
 
+        // Booking already processed
         if (booking.status !== "Pending") {
             return {
                 success: false,
@@ -188,6 +260,7 @@ export const acceptBookingService = async (
             };
         }
 
+        // Accept booking
         booking.status = "Accepted";
 
         await booking.save();
@@ -206,6 +279,50 @@ export const acceptBookingService = async (
             }
         );
 
+        // =====================================
+        // Notify Tenant
+        // =====================================
+        try {
+
+            const tenant = await User.findById(
+                booking.tenant
+            );
+
+            await sendMail(
+
+                tenant.email,
+
+                "Booking Accepted 🎉",
+
+                `
+                <h2>Congratulations ${tenant.name}!</h2>
+
+                <p>
+                    Your booking request has been
+                    <strong>accepted</strong>.
+                </p>
+
+                <p>
+                    You can now contact the owner through
+                    the application.
+                </p>
+
+                <p>
+                    Thank you for using Rent & Flatmate Finder.
+                </p>
+                `
+
+            );
+
+        } catch (mailError) {
+
+            console.log(
+                "Tenant Email Error:",
+                mailError.message
+            );
+
+        }
+
         return {
             success: true,
             statusCode: 200,
@@ -214,10 +331,16 @@ export const acceptBookingService = async (
         };
 
     } catch (error) {
+
         throw error;
+
     }
+
 };
 
+// ======================
+// Reject Booking
+// ======================
 // ======================
 // Reject Booking
 // ======================
@@ -229,6 +352,7 @@ export const rejectBookingService = async (
 
     try {
 
+        // Only owner can reject
         if (role !== "owner") {
             return {
                 success: false,
@@ -237,6 +361,7 @@ export const rejectBookingService = async (
             };
         }
 
+        // Find booking
         const booking = await Booking.findById(bookingId);
 
         if (!booking) {
@@ -247,6 +372,7 @@ export const rejectBookingService = async (
             };
         }
 
+        // Verify owner
         if (booking.owner.toString() !== ownerId) {
             return {
                 success: false,
@@ -255,6 +381,7 @@ export const rejectBookingService = async (
             };
         }
 
+        // Already processed
         if (booking.status !== "Pending") {
             return {
                 success: false,
@@ -263,9 +390,56 @@ export const rejectBookingService = async (
             };
         }
 
+        // Reject booking
         booking.status = "Rejected";
 
         await booking.save();
+
+        // =====================================
+        // Notify Tenant
+        // =====================================
+        try {
+
+            const tenant = await User.findById(
+                booking.tenant
+            );
+
+            await sendMail(
+
+                tenant.email,
+
+                "Booking Rejected",
+
+                `
+                <h2>Hello ${tenant.name},</h2>
+
+                <p>
+                    Unfortunately, your booking request
+                    has been <strong>rejected</strong>.
+                </p>
+
+                <p>
+                    Don't worry! There are many more
+                    properties available on Rent &
+                    Flatmate Finder.
+                </p>
+
+                <p>
+                    We wish you all the best in finding
+                    your next home.
+                </p>
+                `
+
+            );
+
+        } catch (mailError) {
+
+            console.log(
+                "Tenant Email Error:",
+                mailError.message
+            );
+
+        }
 
         return {
             success: true,
@@ -275,6 +449,9 @@ export const rejectBookingService = async (
         };
 
     } catch (error) {
+
         throw error;
+
     }
+
 };
