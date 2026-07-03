@@ -13,6 +13,7 @@ export const addFavorite = async (req, res) => {
 
         const result = await addFavoriteService(
             req.user.id,
+            req.user.role,
             req.params.propertyId
         );
 

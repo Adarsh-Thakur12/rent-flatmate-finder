@@ -11,6 +11,7 @@ app.use("/api/booking", bookingRoutes);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/api/favorite", favoriteRoutes);
 
 app.get("/test", (req, res) => {
     res.json({

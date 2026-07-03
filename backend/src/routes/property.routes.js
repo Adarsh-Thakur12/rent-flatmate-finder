@@ -43,11 +43,17 @@ router.get(
     getMyProperties
 );
 
+router.put(
+    "/:id",
+    verifyToken,
+    validateProperty,
+    updateProperty
+);
 
 // Get Property By ID
 router.get(
     "/:id",
-    getPropertyById
+    getPropertyById,
 );
 
 router.delete(

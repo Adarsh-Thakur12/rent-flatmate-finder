@@ -6,12 +6,21 @@ import Property from "../models/Property.js";
 // =======================
 export const addFavoriteService = async (
     userId,
+    role,
     propertyId
 ) => {
 
     try {
 
         const property = await Property.findById(propertyId);
+
+        if (role !== "tenant") {
+            return {
+                success: false,
+                statusCode: 403,
+                message: "Only tenants can add favorites",
+            };
+        }
 
         if (!property) {
 
