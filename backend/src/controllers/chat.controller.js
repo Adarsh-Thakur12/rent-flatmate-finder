@@ -1,19 +1,23 @@
 import {
-    sendMessageService,
-    getConversationService,
+    saveMessageService,
+    getMessagesService,
 } from "../services/chat.service.js";
 
-// ===================================
+// ======================
 // Send Message
-// ===================================
+// ======================
 export const sendMessage = async (req, res) => {
 
     try {
 
-        const result = await sendMessageService(
-            req.user.id,
+        const result = await saveMessageService(
+
             req.params.bookingId,
+
+            req.user.id,
+
             req.body.message
+
         );
 
         return res
@@ -25,25 +29,30 @@ export const sendMessage = async (req, res) => {
         console.error(error);
 
         return res.status(500).json({
+
             success: false,
-            statusCode: 500,
+
             message: "Internal Server Error",
+
         });
 
     }
 
 };
 
-// ===================================
-// Get Conversation
-// ===================================
-export const getConversation = async (req, res) => {
+// ======================
+// Get Messages
+// ======================
+export const getMessages = async (req, res) => {
 
     try {
 
-        const result = await getConversationService(
+        const result = await getMessagesService(
+
             req.params.bookingId,
+
             req.user.id
+
         );
 
         return res
@@ -55,9 +64,11 @@ export const getConversation = async (req, res) => {
         console.error(error);
 
         return res.status(500).json({
+
             success: false,
-            statusCode: 500,
+
             message: "Internal Server Error",
+
         });
 
     }

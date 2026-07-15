@@ -1,6 +1,32 @@
 import api from "../axios";
 
 // ==========================
+// Create Booking
+// ==========================
+export const createBooking = async (propertyId) => {
+
+    const response = await api.post(
+        `/booking/${propertyId}`
+    );
+
+    return response.data;
+
+};
+
+// ==========================
+// Get Tenant Bookings
+// ==========================
+export const getMyBookings = async () => {
+
+    const response = await api.get(
+        "/booking/my-bookings"
+    );
+
+    return response.data;
+
+};
+
+// ==========================
 // Get Owner Booking Requests
 // ==========================
 export const getPropertyBookings = async () => {

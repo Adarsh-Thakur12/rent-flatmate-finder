@@ -21,6 +21,7 @@ import MyProperties from "../pages/owner/MyProperties";
 import BookingRequests from "../pages/owner/BookingRequests";
 import OwnerChat from "../pages/owner/Chat";
 import EditProperty from "../pages/owner/EditProperty";
+import TenantProfile from "../pages/tenant/TenantProfile";
 
 
 function AppRoutes() {
@@ -85,6 +86,11 @@ function AppRoutes() {
                         </Layout>
                     }
                 />
+                <Route
+                    path="/tenant/profile"
+                    element={<TenantProfile />}
+                />
+    
 
                 <Route
                     path="/tenant/compatibility"

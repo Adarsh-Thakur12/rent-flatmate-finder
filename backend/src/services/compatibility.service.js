@@ -19,6 +19,7 @@ export const generateCompatibilityService = async (
         // -----------------------------
         // Check if compatibility exists
         // -----------------------------
+        
         const existingCompatibility =
             await Compatibility.findOne({
                 tenant: tenantId,
@@ -38,8 +39,9 @@ export const generateCompatibilityService = async (
         // -----------------------------
         // Get Property
         // -----------------------------
-        const property =
-            await Property.findById(propertyId);
+        const property = await Property.findById(propertyId);
+
+        console.log("PROPERTY FOUND:", property);
 
         if (!property) {
 
@@ -54,20 +56,27 @@ export const generateCompatibilityService = async (
         // -----------------------------
         // Get Tenant Profile
         // -----------------------------
-        const profile =
-            await TenantProfile.findOne({
+        console.log("Tenant ID =", tenantId);
+
+        const allProfiles = await TenantProfile.find();
+
+        console.log("ALL PROFILES");
+        console.log(allProfiles);
+        const profile = await TenantProfile.findOne({
                 user: tenantId,
             });
 
-        if (!profile) {
+            console.log("TENANT PROFILE:", profile);
 
-            return {
-                success: false,
-                statusCode: 404,
-                message: "Tenant profile not found",
-            };
+            if (!profile) {
 
-        }
+                return {
+                    success: false,
+                    statusCode: 404,
+                    message: "Tenant profile not found",
+                };
+
+            }
 
         let result;
 

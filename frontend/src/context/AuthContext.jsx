@@ -24,6 +24,7 @@ export const AuthProvider = ({ children }) => {
                 const data = await getProfile();
 
                 setUser(data.user);
+                
 
             } catch (error) {
 
@@ -48,6 +49,7 @@ export const AuthProvider = ({ children }) => {
 
         localStorage.setItem("token", data.token);
 
+        console.log(data.user);
         setUser(data.user);
 
         return data;

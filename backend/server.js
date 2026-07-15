@@ -39,5 +39,5 @@ const startServer = async () => {
     }
 
 };
-
+console.log("Running backend from:", import.meta.url);
 startServer();

@@ -3,29 +3,27 @@ import { verifyToken } from "../middleware/auth.middleware.js";
 
 import {
     sendMessage,
-    getConversation,
+    getMessages,
 } from "../controllers/chat.controller.js";
 
 const router = express.Router();
 
-// ======================================
+// ======================
+// Get Chat History
+// ======================
+router.get(
+    "/:bookingId",
+    verifyToken,
+    getMessages
+);
+
+// ======================
 // Send Message
-// POST /api/chat/:bookingId
-// ======================================
+// ======================
 router.post(
     "/:bookingId",
     verifyToken,
     sendMessage
-);
-
-// ======================================
-// Get Conversation
-// GET /api/chat/:bookingId
-// ======================================
-router.get(
-    "/:bookingId",
-    verifyToken,
-    getConversation
 );
 
 export default router;

@@ -3,6 +3,8 @@ import { generateCompatibilityService } from "../services/compatibility.service.
 export const generateCompatibility = async (req, res) => {
     try {
 
+        console.log("req.user =", req.user);
+        console.log("CONTROLLER HIT");
         const result = await generateCompatibilityService(
             req.user.id,
             req.params.propertyId

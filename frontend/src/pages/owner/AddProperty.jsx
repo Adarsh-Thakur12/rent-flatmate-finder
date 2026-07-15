@@ -50,7 +50,7 @@ function AddProperty() {
     const handleSubmit = async (e) => {
 
         e.preventDefault();
-
+            console.log("Submit clicked");
         try {
 
             setLoading(true);

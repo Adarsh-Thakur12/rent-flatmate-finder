@@ -6,12 +6,15 @@ import {
     acceptBooking,
     rejectBooking,
 } from "../../services/api/booking.api";
+import { useNavigate } from "react-router-dom";
 
 function BookingRequests() {
-
+    
     const [bookings, setBookings] = useState([]);
-
+    
     const [loading, setLoading] = useState(true);
+    
+    const navigate = useNavigate();
 
     // ==========================
     // Fetch Booking Requests
@@ -254,68 +257,71 @@ function BookingRequests() {
                                 <hr className="my-5" />
 
                                 {/* Status */}
+                                
 
-                                <div className="flex justify-between items-center">
+                               <div className="mt-5">
 
-                                    <span
-                                        className={`px-4 py-2 rounded-full text-sm font-medium ${
-                                            booking.status === "Pending"
-                                                ? "bg-yellow-100 text-yellow-700"
-                                                : booking.status === "Accepted"
-                                                ? "bg-green-100 text-green-700"
-                                                : "bg-red-100 text-red-700"
-                                        }`}
-                                    >
+    <div className="flex justify-between items-center">
 
-                                        {booking.status}
+        <span
+            className={`px-4 py-2 rounded-full text-sm font-medium ${
+                booking.status === "Pending"
+                    ? "bg-yellow-100 text-yellow-700"
+                    : booking.status === "Accepted"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+            }`}
+        >
+            {booking.status}
+        </span>
 
-                                    </span>
+        {booking.status === "Accepted" && (
 
-                                    {
+            <button
 
-                                        booking.status === "Pending" && (
+                onClick={() =>
+                    navigate(`/owner/chat/${booking._id}`)
+                }
 
-                                            <div className="flex gap-3">
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
 
-                                                <button
+            >
+                Open Chat
+            </button>
 
-                                                    onClick={() =>
-                                                        handleAccept(
-                                                            booking._id
-                                                        )
-                                                    }
+        )}
 
-                                                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+    </div>
 
-                                                >
+    {booking.status === "Pending" && (
 
-                                                    Accept
+        <div className="flex gap-3 mt-5">
 
-                                                </button>
+            <button
 
-                                                <button
+                onClick={() => handleAccept(booking._id)}
 
-                                                    onClick={() =>
-                                                        handleReject(
-                                                            booking._id
-                                                        )
-                                                    }
+                className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700"
 
-                                                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+            >
+                Accept
+            </button>
 
-                                                >
+            <button
 
-                                                    Reject
+                onClick={() => handleReject(booking._id)}
 
-                                                </button>
+                className="flex-1 bg-red-600 text-white py-3 rounded-lg hover:bg-red-700"
 
-                                            </div>
+            >
+                Reject
+            </button>
 
-                                        )
+        </div>
 
-                                    }
+    )}
 
-                                </div>
+</div>
 
                             </div>
 

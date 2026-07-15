@@ -1,47 +1,39 @@
-import Message from "../models/Message.js";
+import Chat from "../models/Chat.js";
 import Booking from "../models/Booking.js";
-import { getIO } from "../sockets/socket.js";
 
-// ==============================
-// Send Message
-// ==============================
-export const sendMessageService = async (
-    senderId,
+// ======================
+// Save Message
+// ======================
+export const saveMessageService = async (
     bookingId,
+    senderId,
     message
 ) => {
 
     try {
 
-        const booking = await Booking.findById(bookingId);
+        const booking = await Booking.findById(
+            bookingId
+        );
 
         if (!booking) {
+
             return {
                 success: false,
                 statusCode: 404,
                 message: "Booking not found",
             };
+
         }
 
-        if (booking.status !== "Accepted") {
-            return {
-                success: false,
-                statusCode: 403,
-                message: "Chat is allowed only after booking is accepted.",
-            };
-        }
+        // Only owner or tenant can send messages
+        if (
 
-        let receiverId;
+            booking.owner.toString() !== senderId &&
 
-        if (booking.tenant.toString() === senderId) {
+            booking.tenant.toString() !== senderId
 
-            receiverId = booking.owner;
-
-        } else if (booking.owner.toString() === senderId) {
-
-            receiverId = booking.tenant;
-
-        } else {
+        ) {
 
             return {
                 success: false,
@@ -51,28 +43,38 @@ export const sendMessageService = async (
 
         }
 
-        const newMessage = await Message.create({
-            sender: senderId,
-            receiver: receiverId,
+        // Chat allowed only after acceptance
+        if (booking.status !== "Accepted") {
+
+            return {
+                success: false,
+                statusCode: 400,
+                message: "Chat is available only after booking acceptance",
+            };
+
+        }
+
+        const chat = await Chat.create({
+
             booking: bookingId,
+
+            sender: senderId,
+
             message,
+
         });
-
-        const populatedMessage = await Message.findById(newMessage._id)
-            .populate("sender", "name email")
-            .populate("receiver", "name email");
-
-            const io = getIO();
-
-            io.to(bookingId).emit("receive-message", populatedMessage);
-
+        await chat.populate(
+            "sender",
+            "name email"
+        );
+        
         return {
 
             success: true,
-            statusCode: 201,
-            message: "Message sent successfully",
 
-            data: newMessage,
+            statusCode: 201,
+
+            chat,
 
         };
 
@@ -84,17 +86,19 @@ export const sendMessageService = async (
 
 };
 
-// ==============================
-// Get Conversation
-// ==============================
-export const getConversationService = async (
+// ======================
+// Get Chat History
+// ======================
+export const getMessagesService = async (
     bookingId,
     userId
 ) => {
 
     try {
 
-        const booking = await Booking.findById(bookingId);
+        const booking = await Booking.findById(
+            bookingId
+        );
 
         if (!booking) {
 
@@ -106,14 +110,13 @@ export const getConversationService = async (
 
         }
 
-        const allowedUsers = [
+        if (
 
-            booking.owner.toString(),
-            booking.tenant.toString(),
+            booking.owner.toString() !== userId &&
 
-        ];
+            booking.tenant.toString() !== userId
 
-        if (!allowedUsers.includes(userId)) {
+        ) {
 
             return {
                 success: false,
@@ -123,23 +126,30 @@ export const getConversationService = async (
 
         }
 
-        const messages = await Message.find({
+        const chats = await Chat.find({
 
             booking: bookingId,
 
         })
-            .populate("sender", "name email")
-            .populate("receiver", "name email")
-            .sort({ createdAt: 1 });
+
+            .populate(
+                "sender",
+                "name email"
+            )
+
+            .sort({
+
+                createdAt: 1,
+
+            });
 
         return {
 
             success: true,
+
             statusCode: 200,
 
-            count: messages.length,
-
-            messages,
+            chats,
 
         };
 
